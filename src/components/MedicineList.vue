@@ -9,18 +9,18 @@
         class="search-input"
       />
       <div class="filter-container">
-        <el-select v-model="selectedCategory" placeholder="药品类别" @change="fetchMedicines" class="filter-select">
+        <el-select v-model="selectedCategory" placeholder="药品类别" @change="fetchMedicines" class="filter-select" clearable>
           <el-option label="抗生素" value="抗生素"></el-option>
           <el-option label="抗病毒药物" value="抗病毒药物"></el-option>
           <el-option label="抗真菌药物" value="抗真菌药物"></el-option>
           <el-option label="抗肿瘤药物" value="抗肿瘤药物"></el-option>
           <el-option label="镇痛药" value="镇痛药"></el-option>
         </el-select>
-        <el-select v-model="isPrescription" placeholder="处方药" @change="fetchMedicines" class="filter-select">
+        <el-select v-model="isPrescription" placeholder="处方药" @change="fetchMedicines" class="filter-select" clearable>
           <el-option label="是" :value="true"></el-option>
           <el-option label="否" :value="false"></el-option>
         </el-select>
-        <el-select v-model="isHealthcare" placeholder="保健品" @change="fetchMedicines" class="filter-select">
+        <el-select v-model="isHealthcare" placeholder="保健品" @change="fetchMedicines" class="filter-select" clearable>
           <el-option label="是" :value="true"></el-option>
           <el-option label="否" :value="false"></el-option>
         </el-select>

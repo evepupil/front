@@ -21,7 +21,7 @@
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="updateProfile">保存修改</el-button>
-            <el-button type="danger" @click="resetPassword">重置密码</el-button>
+            <el-button type="danger" @click="openResetPasswordDialog">重置密码</el-button>
           </el-form-item>
           <el-form-item>
             <el-button type="warning" @click="logout">注销</el-button>
@@ -29,12 +29,30 @@
         </el-form>
       </div>
     </el-card>
+
+    <el-dialog title="重置密码" v-model="resetPasswordDialogVisible">
+      <el-form :model="resetPasswordForm">
+        <el-form-item label="原密码" :rules="[{ required: true, message: '请输入原密码', trigger: 'blur' }]">
+          <el-input type="password" v-model="resetPasswordForm.oldPassword" placeholder="请输入原密码"></el-input>
+        </el-form-item>
+        <el-form-item label="新密码" :rules="[{ required: true, message: '请输入新密码', trigger: 'blur' }]">
+          <el-input type="password" v-model="resetPasswordForm.newPassword" placeholder="请输入新密码"></el-input>
+        </el-form-item>
+        <el-form-item label="确认新密码" :rules="[{ required: true, message: '请确认新密码', trigger: 'blur' }]">
+          <el-input type="password" v-model="resetPasswordForm.confirmPassword" placeholder="请确认新密码"></el-input>
+        </el-form-item>
+      </el-form>
+      <template v-slot:footer>
+        <el-button @click="resetPasswordDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="resetPassword">确 定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import http from '@/http'; // 引入配置好的 Axios 实例
-import { ElCard, ElForm, ElFormItem, ElInput, ElButton, ElMessage } from 'element-plus'; // 引入 Element Plus 组件
+import { ElCard, ElForm, ElFormItem, ElInput, ElButton, ElMessage, ElDialog } from 'element-plus'; // 引入 Element Plus 组件
 
 export default {
   name: 'UserProfile',
@@ -44,6 +62,7 @@ export default {
     ElFormItem,
     ElInput,
     ElButton,
+    ElDialog,
   },
   data() {
     return {
@@ -54,6 +73,12 @@ export default {
         address: '',
         created_at: '',
         isAdmin: false,
+      },
+      resetPasswordDialogVisible: false, // 控制重置密码对话框的显示
+      resetPasswordForm: {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
       },
     };
   },
@@ -96,16 +121,31 @@ export default {
         ElMessage.error(`更新失败: ${error.message}`);
       }
     },
+    openResetPasswordDialog() {
+      this.resetPasswordDialogVisible = true; // 打开对话框
+    },
     async resetPassword() {
+      // 验证新密码和确认密码是否一致
+      if (this.resetPasswordForm.newPassword !== this.resetPasswordForm.confirmPassword) {
+        ElMessage.error('新密码和确认密码不一致');
+        return;
+      }
+
       try {
-        const response = await http.post('/user/reset-password');
+        const response = await http.post('/user/reset-password', {
+          old_password: this.resetPasswordForm.oldPassword,
+          new_password: this.resetPasswordForm.newPassword,
+        });
+
         if (response.data.code === 0) {
-          ElMessage.success('密码重置成功，请检查您的邮箱');
+          ElMessage.success('密码重置成功');
+          this.resetPasswordDialogVisible = false; // 关闭对话框
+          this.resetPasswordForm = { oldPassword: '', newPassword: '', confirmPassword: '' }; // 重置表单
         } else {
-          ElMessage.error(`重置失败: ${response.data.message}`);
+          ElMessage.error(response.data.message);
         }
       } catch (error) {
-        ElMessage.error(`重置失败: ${error.message}`);
+        ElMessage.error('重置密码失败');
       }
     },
     logout() {

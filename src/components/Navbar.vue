@@ -10,7 +10,7 @@
       <el-menu-item index="1" @click="navigateTo('')">首页</el-menu-item>
       <el-menu-item index="2" @click="navigateTo('cart')">购物车</el-menu-item>
       <el-menu-item index="3" @click="navigateTo('orders')">订单</el-menu-item>
-      <el-menu-item index="4" v-if="isAdmin" @click="navigateTo('manage-products')">商品管理</el-menu-item>
+      <el-menu-item index="4" v-if="isAdmin" @click="navigateTo('manage-products')">药品管理</el-menu-item>
       <el-menu-item index="5" @click="navigateTo('profile')">个人中心</el-menu-item>
     </el-menu>
   </el-header>
