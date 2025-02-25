@@ -11,7 +11,8 @@
       <el-menu-item index="2" @click="navigateTo('cart')">购物车</el-menu-item>
       <el-menu-item index="3" @click="navigateTo('orders')">订单</el-menu-item>
       <el-menu-item index="4" v-if="isAdmin" @click="navigateTo('manage-products')">药品管理</el-menu-item>
-      <el-menu-item index="5" @click="navigateTo('profile')">个人中心</el-menu-item>
+      <el-menu-item index="5" v-if="isAdmin" @click="navigateTo('user-management')">用户管理</el-menu-item>
+      <el-menu-item index="6" @click="navigateTo('profile')">个人中心</el-menu-item>
     </el-menu>
   </el-header>
 </template>
@@ -47,8 +48,10 @@ export default {
         this.activeMenu = '3';
       } else if (path.includes('manage-products')) {
         this.activeMenu = '4';
-      } else if (path.includes('profile')) {
+      } else if (path.includes('user-management')) {
         this.activeMenu = '5';
+      } else if (path.includes('profile')) {
+        this.activeMenu = '6';
       } else {
         this.activeMenu = '1';
       }

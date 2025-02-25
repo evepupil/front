@@ -7,6 +7,7 @@ import Register from '../components/Register.vue';
 import OrderList from '../components/OrderList.vue';
 import UserProfile from '../components/UserProfile.vue';
 import ManageProducts from '../components/ManageProducts.vue';
+import UserManagement from '../components/UserManagement.vue';
 
 const routes = [
   {
@@ -37,6 +38,11 @@ const routes = [
         path: 'manage-products',
         name: 'ManageProducts',
         component: ManageProducts,
+      },
+      {
+        path: 'user-management',
+        name: 'UserManagement',
+        component: UserManagement,
       },
     ],
   },

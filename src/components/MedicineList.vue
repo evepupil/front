@@ -1,13 +1,13 @@
 <template>
-  <div>
+  <div class="medicine-list-container">
     <div class="search-container">
       <el-input
         v-model="searchKeyword"
         placeholder="搜索药品"
-        @input="fetchMedicines"
         clearable
         class="search-input"
       />
+      <el-button type="primary" @click="fetchMedicines" class="search-button">搜索</el-button>
       <div class="filter-container">
         <el-select v-model="selectedCategory" placeholder="药品类别" @change="fetchMedicines" class="filter-select" clearable>
           <el-option label="抗生素" value="抗生素"></el-option>
@@ -26,18 +26,40 @@
         </el-select>
       </div>
     </div>
-    <div class="medicine-container">
-      <ul class="medicine-list">
-        <li v-for="medicine in medicines" :key="medicine.id" class="medicine-item" @click="openDialog(medicine)">
-          <img :src="medicine.image ? 'data:image/jpeg;base64,' + medicine.image : require('@/assets/default_image.jpg')" alt="药品图片" class="medicine-image" />
-          <div class="medicine-info">
-            <h3 class="medicine-name">{{ medicine.name }}</h3>
-            <p class="medicine-description">{{ medicine.description }}</p>
-            <span class="medicine-price">价格: {{ medicine.price }}元</span>
-            <span class="medicine-stock">库存: {{ medicine.stock }}件</span>
-          </div>
-        </li>
-      </ul>
+    <div class="main-content">
+      <div class="medicine-container">
+        <ul class="medicine-list">
+          <li v-for="medicine in medicines" :key="medicine.id" class="medicine-item" @click="openDialog(medicine)">
+            <img :src="medicine.image ? 'data:image/jpeg;base64,' + medicine.image : require('@/assets/default_image.jpg')" alt="药品图片" class="medicine-image" />
+            <div class="medicine-info">
+              <h3 class="medicine-name">{{ medicine.name }}</h3>
+              <p class="medicine-description">{{ medicine.description }}</p>
+              <span class="medicine-price">价格: {{ medicine.price }}元</span>
+              <span class="medicine-stock">库存: {{ medicine.stock }}件</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="recommendations">
+        <div class="new-products">
+          <h3>新品推荐</h3>
+          <ul>
+            <li v-for="newMedicine in newMedicines" :key="newMedicine.id">
+              <img :src="newMedicine.image ? 'data:image/jpeg;base64,' + newMedicine.image : require('@/assets/default_image.jpg')" alt="新品图片" class="recommendation-image" />
+              <span>{{ newMedicine.name }}</span>
+            </li>
+          </ul>
+        </div>
+        <div class="hot-products">
+          <h3>热门推荐</h3>
+          <ul>
+            <li v-for="hotMedicine in hotMedicines" :key="hotMedicine.id">
+              <img :src="hotMedicine.image ? 'data:image/jpeg;base64,' + hotMedicine.image : require('@/assets/default_image.jpg')" alt="热门图片" class="recommendation-image" />
+              <span>{{ hotMedicine.name }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
     <el-dialog v-model="dialogVisible" title="药品详情">
       <div v-if="selectedMedicine">
@@ -91,21 +113,24 @@ export default {
   },
   data() {
     return {
+      searchKeyword: '',
+      selectedCategory: '',
+      isPrescription: null,
+      isHealthcare: null,
       medicines: [],
+      newMedicines: [], // 新品推荐
+      hotMedicines: [], // 热门推荐
+      dialogVisible: false,
+      selectedMedicine: null,
+      purchaseQuantity: 1,
       currentPage: 1,
       itemsPerPage: 20,
-      totalMedicines: 0, // 用于存储总药品数量
-      searchKeyword: '', // 搜索关键字
-      selectedCategory: '', // 选择的药品类别
-      isPrescription: null, // 处方药选择
-      isHealthcare: null, // 保健品选择
-      dialogVisible: false, // 控制对话框的显示
-      selectedMedicine: null, // 存储选中的药品信息
-      purchaseQuantity: 1, // 购买数量
+      totalMedicines: 0,
     };
   },
   async mounted() {
     await this.fetchMedicines();
+    await this.fetchRecommendations(); // 获取推荐药品
   },
   methods: {
     async fetchMedicines() {
@@ -123,6 +148,7 @@ export default {
         if (response.data.code === 0) {
           this.medicines = response.data.medicines;
           this.totalMedicines = this.medicines.length; // 假设后端返回总药品数量
+          this.loadMedicineImages(this.medicines); // 加载药品图片
         } else {
           ElMessage.error('获取药品列表失败');
         }
@@ -130,10 +156,37 @@ export default {
         console.error('获取药品列表失败:', error);
       }
     },
+    async fetchRecommendations() {
+      try {
+        const response = await http.get('/medicines/recommendations');
+        if (response.data.code === 0) {
+          this.newMedicines = response.data.newMedicines; // 新品推荐
+          this.hotMedicines = response.data.hotMedicines; // 热门推荐
+          // 根据 ID 获取图片
+          await this.loadMedicineImages(this.newMedicines);
+          await this.loadMedicineImages(this.hotMedicines);
+        } else {
+          ElMessage.error('获取推荐药品失败');
+        }
+      } catch (error) {
+        console.error('获取推荐药品失败:', error);
+      }
+    },
+    async loadMedicineImages(medicines) {
+      for (const medicine of medicines) {
+        try {
+          const response = await http.post('/medicines/ids', { ids: [medicine.id] });
+          if (response.data.code === 0) {
+            medicine.image = response.data.medicines[0].image; // 更新图片
+          }
+        } catch (error) {
+          console.error('获取药品图片失败:', error);
+        }
+      }
+    },
     openDialog(medicine) {
-      this.selectedMedicine = medicine; // 设置选中的药品
-      this.purchaseQuantity = 1; // 重置购买数量
-      this.dialogVisible = true; // 显示对话框
+      this.selectedMedicine = medicine;
+      this.dialogVisible = true;
     },
     async addToCart() {
       try {
@@ -175,15 +228,20 @@ export default {
 </script>
 
 <style scoped>
+.medicine-list-container {
+  display: flex;
+  flex-direction: column; /* 垂直排列 */
+}
+
 .search-container {
   display: flex;
-  flex-direction: column; /* 垂直排列搜索框和筛选器 */
+  align-items: center; /* 水平居中对齐 */
   margin-bottom: 16px; /* 搜索框和药品列表之间的间距 */
-  align-items: center; /* 居中对齐 */
 }
 
 .search-input {
   width: 300px; /* 设置搜索框宽度 */
+  margin-right: 10px; /* 搜索框与按钮之间的间距 */
 }
 
 .filter-container {
@@ -196,15 +254,31 @@ export default {
   width: 120px; /* 设置筛选器宽度 */
 }
 
+.main-content {
+  display: flex; /* 使用 Flexbox 布局 */
+  margin-top: 20px; /* 主内容与搜索框之间的间距 */
+}
+
 .medicine-container {
-  width: 95%; 
+  width: 70%; /* 药品列表占70%宽度 */
+  padding-right: 20px; /* 右侧间距 */
+}
+
+.recommendations {
+  width: 30%; /* 推荐区域占30%宽度 */
+}
+
+.new-products, .hot-products {
+  margin-bottom: 20px; /* 推荐区域之间的间距 */
+}
+
+.recommendation-image {
+  width: 100%; /* 推荐药品图片宽度 */
   height: auto; /* 自适应高度 */
-  overflow-y: auto; /* 允许垂直滚动 */
-  border: 1px solid #ccc; /* 边框样式 */
-  border-radius: 8px; /* 圆角 */
-  padding: 16px; /* 内边距 */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 阴影效果 */
-  margin: 0 auto; /* 居中对齐 */
+}
+
+h3 {
+  margin-bottom: 10px; /* 标题与内容之间的间距 */
 }
 
 .pagination {
