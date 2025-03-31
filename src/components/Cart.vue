@@ -10,7 +10,7 @@
         <div class="cart-item-body">
           <img v-if="item.image" :src="item.image" alt="药品图片" class="medicine-image" />
           <div class="medicine-info">
-            <h3>{{ item.name }}</h3>
+            <h3 class="medicine-name">{{ item.name }}</h3>
             <p>描述: {{ item.description }}</p>
             <p>单价: {{ item.price }}元</p>
             <el-input-number v-model="item.quantity" @change="updateTotalPrice" :min="1"></el-input-number>
@@ -114,7 +114,7 @@ export default {
         const response = await http.delete('/cart', { data: { item_ids: itemIds } });
         if (response.data.code === 0) {
           ElMessage.success('选中商品已成功删除');
-          this.fetchCartItems();
+          await this.fetchCartItems();
         } else {
           ElMessage.error(`商品删除失败: ${response.data.message}`);
         }
@@ -134,7 +134,7 @@ export default {
         const response = await http.post('/cart/checkout', { items: itemsToCheckout });
         if (response.data.code === 0) {
           ElMessage.success('所有选中商品已成功结算');
-          this.fetchCartItems();
+          await this.fetchCartItems();
         } else {
           ElMessage.error(`结算失败: ${response.data.message}`);
         }
@@ -156,7 +156,7 @@ export default {
 
 .cart-item {
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   border: 1px solid #e0e0e0;
@@ -177,7 +177,7 @@ export default {
 }
 
 .medicine-image {
-  width: 80px;
+  width: 200px;
   height: auto;
   margin-right: 10px;
 }
@@ -201,5 +201,10 @@ export default {
 .total-quantity {
   font-size: 18px;
   font-weight: bold;
+}
+.medicine-name {
+  overflow: hidden; /* 超出部分隐藏 */
+  text-overflow: ellipsis; /* 省略号 */
+  max-width: 80%; /* 限制名称的最大宽度 */
 }
 </style>

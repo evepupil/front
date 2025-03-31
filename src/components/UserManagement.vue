@@ -20,11 +20,13 @@
         <el-form-item label="用户名">
           <el-input v-model="editUser.username" disabled></el-input>
         </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="editUser.email"></el-input>
+        <el-form-item label="邮箱" :class="{ 'is-error': emailError }">
+          <el-input v-model="editUser.email" @blur="validateEmail"></el-input>
+          <div v-if="emailError" class="error-message">{{ emailError }}</div>
         </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="editUser.phone"></el-input>
+        <el-form-item label="电话" :class="{ 'is-error': phoneError }">
+          <el-input v-model="editUser.phone" @blur="validatePhone"></el-input>
+          <div v-if="phoneError" class="error-message">{{ phoneError }}</div>
         </el-form-item>
         <el-form-item label="地址">
           <el-input v-model="editUser.address"></el-input>
@@ -58,6 +60,8 @@ export default {
         is_admin: false,
       },
       editDialogVisible: false, // 控制编辑对话框的显示
+      emailError: '', // 邮箱错误信息
+      phoneError: '', // 电话错误信息
     };
   },
   async created() {
@@ -79,21 +83,48 @@ export default {
     openEditDialog(user) {
       this.editUser = { ...user }; // 复制用户信息到编辑对象
       this.editDialogVisible = true; // 打开编辑对话框
+      this.emailError = ''; // 清空错误信息
+      this.phoneError = ''; // 清空错误信息
     },
     async updateUserProfile() {
-      try {
-        const response = await http.put(`/users/${this.editUser.id}`, this.editUser); // 假设后端有此接口
-        if (response.data.code === 0) {
-          ElMessage.success('用户信息更新成功');
-          this.editDialogVisible = false; // 关闭对话框
-          await this.fetchUsers(); // 重新获取用户列表
-        } else {
+      if (this.validateEmail() && this.validatePhone()) {
+        try {
+          const response = await http.put(`/users/${this.editUser.id}`, this.editUser); 
+          if (response.data.code === 0) {
+            ElMessage.success('用户信息更新成功');
+            this.editDialogVisible = false; // 关闭对话框
+            await this.fetchUsers(); // 重新获取用户列表
+          } else {
+            ElMessage.error('更新用户信息失败');
+          }
+        } catch (error) {
+          console.error('更新用户信息失败:', error);
           ElMessage.error('更新用户信息失败');
         }
-      } catch (error) {
-        console.error('更新用户信息失败:', error);
-        ElMessage.error('更新用户信息失败');
       }
+    },
+    validateEmail() {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 简单的邮箱正则表达式
+      if (!emailPattern.test(this.editUser.email)) {
+        this.emailError = '请输入有效的邮箱地址';
+        return false;
+      }
+      this.emailError = ''; // 清空错误信息
+      return true;
+    },
+    validatePhone() {
+      // 允许电话为空
+      if (this.editUser.phone === '') {
+        this.phoneError = ''; // 清空错误信息
+        return true; // 允许为空
+      }
+      const phonePattern = /^\d{10}$/; // 假设电话号码为10位数字
+      if (!phonePattern.test(this.editUser.phone)) {
+        this.phoneError = '请输入有效的电话号码';
+        return false;
+      }
+      this.phoneError = ''; // 清空错误信息
+      return true;
     },
     formatUserType(row) {
       return row.is_admin ? '管理员' : '普通用户'; // 格式化用户类型
@@ -116,5 +147,8 @@ export default {
 </script>
 
 <style scoped>
-/* 添加样式 */
+.error-message {
+  color: red; /* 错误消息颜色 */
+  font-size: 12px; /* 错误消息字体大小 */
+}
 </style> 

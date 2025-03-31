@@ -60,17 +60,17 @@ export default {
 
         if (response.data.code === 0) {
           // 登录成功，保存 token
-          localStorage.setItem('token', response.data.token); // 假设 token 在响应中返回
+          localStorage.setItem('token', response.data.token);
           const isAdmin = response.data.user.is_admin; // 获取用户角色信息
           localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-          this.$router.push('/'); // 假设跳转到主页
+          this.$router.push('/'); // 
           ElMessage.success('登录成功！');
         } else {
-          ElMessage.error(response.data.message); // 使用 ElMessage 显示错误消息
+          ElMessage.error(response.data.message);
         }
       } catch (error) {
         console.error(error);
-        ElMessage.error('登录失败，请重试。'); // 使用 ElMessage 显示错误消息
+        ElMessage.error('登录失败，请重试。'); 
       }
     },
   },
