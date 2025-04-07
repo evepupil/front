@@ -1,57 +1,79 @@
 <template>
-  
-    <div class="main-content">
-      <div class="search-container">
-      <el-input
-        v-model="searchKeyword"
-        placeholder="搜索药品"
-        clearable
-        class="search-input"
-      />
-      <el-button type="primary" @click="fetchMedicines" class="search-button">搜索</el-button>
+  <div class="main-content">
+    <!-- 搜索容器在最上方居中 -->
+    <div class="search-container">
+      <div class="search-input-group">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索药品"
+          clearable
+          class="search-input"
+        />
+        <el-button type="primary" @click="fetchMedicines" class="search-button">搜索</el-button>
+      </div>
       <div class="filter-container">
-        <el-select v-model="selectedCategory" placeholder="药品类别" @change="fetchMedicines" class="filter-select" clearable>
-          <el-option label="抗生素" value="抗生素"></el-option>
-          <el-option label="抗病毒药物" value="抗病毒药物"></el-option>
-          <el-option label="抗真菌药物" value="抗真菌药物"></el-option>
-          <el-option label="抗肿瘤药物" value="抗肿瘤药物"></el-option>
-          <el-option label="镇痛药" value="镇痛药"></el-option>
-        </el-select>
-        <el-select v-model="isPrescription" placeholder="处方药" @change="fetchMedicines" class="filter-select" clearable>
-          <el-option label="是" :value="true"></el-option>
-          <el-option label="否" :value="false"></el-option>
-        </el-select>
-        <el-select v-model="isHealthcare" placeholder="保健品" @change="fetchMedicines" class="filter-select" clearable>
-          <el-option label="是" :value="true"></el-option>
-          <el-option label="否" :value="false"></el-option>
-        </el-select>
+        <div class="filter-group">
+          <span>类别:</span>
+          <el-checkbox v-model="selectAllCategories" @change="toggleAllCategories">全部</el-checkbox>
+          <el-checkbox-group v-model="selectedCategories" @change="fetchMedicines">
+            <el-checkbox label="抗生素">抗生素</el-checkbox>
+            <el-checkbox label="抗病毒药物">抗病毒药物</el-checkbox>
+            <el-checkbox label="抗真菌药物">抗真菌药物</el-checkbox>
+            <el-checkbox label="抗肿瘤药物">抗肿瘤药物</el-checkbox>
+            <el-checkbox label="镇痛药">镇痛药</el-checkbox>
+          </el-checkbox-group>
+        </div>
+        
+        <div class="filter-group">
+          <span>处方药:</span>
+          <el-checkbox-group v-model="isPrescriptionArray" @change="handlePrescriptionChange">
+            <el-checkbox label="是">是</el-checkbox>
+            <el-checkbox label="否">否</el-checkbox>
+          </el-checkbox-group>
+        </div>
+        
+        <div class="filter-group">
+          <span>保健品:</span>
+          <el-checkbox-group v-model="isHealthcareArray" @change="handleHealthcareChange">
+            <el-checkbox label="是">是</el-checkbox>
+            <el-checkbox label="否">否</el-checkbox>
+          </el-checkbox-group>
+        </div>
       </div>
     </div>
 
-      <div class="medicine-container">
-        <ul class="medicine-list">
-          <li v-for="medicine in medicines" :key="medicine.id" class="medicine-item" @click="openDialog(medicine)">
-            <img :src="medicine.image ? 'data:image/jpeg;base64,' + medicine.image : require('@/assets/default_image.jpg')" alt="药品图片" class="medicine-image" />
-            <div class="medicine-info">
-              <h3 class="medicine-name">{{ medicine.name }}</h3>
-              <p class="medicine-description">{{ medicine.description }}</p>
-              <span class="medicine-price">价格: {{ medicine.price }}元</span>
-              <span class="medicine-stock">库存: {{ medicine.stock }}件</span>
-            </div>
-          </li>
-        </ul>
-      </div>
+    <!-- 药品容器包含药品列表和推荐区域 -->
+    <div class="medicine-container">
+      <!-- 药品列表在左侧 -->
+      <ul class="medicine-list">
+        <li v-for="medicine in medicines" :key="medicine.id" class="medicine-item" @click="openDialog(medicine)">
+          <img :src="medicine.image ? 'data:image/jpeg;base64,' + medicine.image : require('@/assets/default_image.jpg')" alt="药品图片" class="medicine-image" />
+          <div class="medicine-info">
+            <h3 class="medicine-name" :title="medicine.name">{{ medicine.name }}</h3>
+            <p class="medicine-description" v-if="medicine.description">{{ medicine.description }}</p>
+            <p class="medicine-description empty-description" v-else>&nbsp;</p>
+            <p class="medicine-price">价格: {{ medicine.price }}元</p>
+            <p class="medicine-stock">库存: {{ medicine.stock }}件</p>
+            <p class="medicine-stock">销量: {{ medicine.sales }}件</p>
+
+          </div>
+        </li>
+      </ul>
+      
+      <!-- 推荐区域在右侧 -->
       <div class="recommendations">
         <div class="new-products">
           <h3>新品推荐</h3>
           <ul>
             <li v-for="(newMedicine, index) in newMedicines.slice(0, 5)" :key="newMedicine.id" class="medicine-item" @click="openDialog(newMedicine)">
-              <!-- 显示排名顺序 -->
               <span class="rank">{{ index + 1 }}.</span>
               <img :src="newMedicine.image ? 'data:image/jpeg;base64,' + newMedicine.image : require('@/assets/default_image.jpg')" alt="新品图片" class="recommendation-image" />
               <div class="medicine-info">
-                <h3 class="medicine-name">{{ newMedicine.name }}</h3>
-                <span class="medicine-price">价格: {{ newMedicine.price }}元</span>
+                <h3 class="medicine-name" :title="newMedicine.name">{{ newMedicine.name }}</h3>
+                <p class="medicine-description" v-if="newMedicine.description">{{ newMedicine.description }}</p>
+                <p class="medicine-description empty-description" v-else>&nbsp;</p>
+                <p class="medicine-price">价格: {{ newMedicine.price }}元</p>
+                <p class="medicine-stock">库存: {{ newMedicine.stock }}件</p>
               </div>
             </li>
           </ul>
@@ -63,14 +85,38 @@
               <span class="rank">{{ index + 1 }}.</span>
               <img :src="hotMedicine.image ? 'data:image/jpeg;base64,' + hotMedicine.image : require('@/assets/default_image.jpg')" alt="热门图片" class="recommendation-image" />
               <div class="medicine-info">
-              <h3 class="medicine-name">{{ hotMedicine.name }}</h3>
-              <span class="medicine-price">价格: {{ hotMedicine.price }}元</span>
+                <h3 class="medicine-name" :title="hotMedicine.name">{{ hotMedicine.name }}</h3>
+                <p class="medicine-description" v-if="hotMedicine.description">{{ hotMedicine.description }}</p>
+                <p class="medicine-description empty-description" v-else>&nbsp;</p>
+                <p class="medicine-price">价格: {{ hotMedicine.price }}元</p>
+                <p class="medicine-stock">库存: {{ hotMedicine.stock }}件</p>
+                <p class="medicine-sales">销量: {{ hotMedicine.sales }}件</p>
               </div>
             </li>
           </ul>
         </div>
       </div>
     </div>
+    
+    <!-- 分页控件 -->
+    <div class="pagination">
+      <div class="select">
+        <el-select v-model="itemsPerPage" @change="fetchMedicines" placeholder="每页数量">
+        <el-option label="20" :value="20"></el-option>
+        <el-option label="50" :value="50"></el-option>
+      </el-select>
+      </div>
+            <el-pagination
+        @current-change="fetchMedicines"
+        :current-page="currentPage"
+        :page-size="itemsPerPage"
+        :total="totalMedicines"
+        layout="prev, pager, next"
+        class="pagination-component"
+      />
+    </div>
+    
+    <!-- 药品详情对话框 -->
     <el-dialog v-model="dialogVisible" title="药品详情">
       <div v-if="selectedMedicine">
         <div class="medicine-image-container">
@@ -89,28 +135,13 @@
         <el-button @click="dialogVisible = false">关闭</el-button>
       </template>
     </el-dialog>
-    <div class="pagination">
-      <div class="select">
-        <el-select v-model="itemsPerPage" @change="fetchMedicines" placeholder="每页数量">
-        <el-option label="20" :value="20"></el-option>
-        <el-option label="50" :value="50"></el-option>
-      </el-select>
-      </div>
-            <el-pagination
-        @current-change="fetchMedicines"
-        :current-page="currentPage"
-        :page-size="itemsPerPage"
-        :total="totalMedicines"
-        layout="prev, pager, next"
-        class="pagination-component"
-      />
-    </div>
+  </div>
 </template>
 
 <script>
 import axios from 'axios';
 import http from '@/http'; // 引入配置好的 Axios 实例
-import { ElSelect, ElOption, ElDialog, ElInputNumber, ElMessage,  ElButton } from 'element-plus';
+import { ElSelect, ElOption, ElDialog, ElInputNumber, ElMessage,  ElButton, ElCheckbox, ElCheckboxGroup } from 'element-plus';
 
 export default {
   name: 'MedicineList',
@@ -120,14 +151,19 @@ export default {
     ElDialog,
     ElInputNumber,
     ElButton,
+    ElCheckbox,
+    ElCheckboxGroup
   },
   data() {
     return {
       searchKeyword: '',
       showDropdown: false, // 控制下拉框的显示
       selectedCategories: [], // 选中的类别
+      selectAllCategories: false, // 是否全选类别
       isPrescription: null, // 是否处方药
       isHealthcare: null, // 是否保健品
+      isPrescriptionArray: [], // 处方药复选框数组
+      isHealthcareArray: [], // 保健品复选框数组
       medicines: [],
       newMedicines: [], // 新品推荐
       hotMedicines: [], // 热门推荐
@@ -137,6 +173,7 @@ export default {
       currentPage: 1,
       itemsPerPage: 20,
       totalMedicines: 0,
+      allCategories: ['抗生素', '抗病毒药物', '抗真菌药物', '抗肿瘤药物', '镇痛药'], // 所有类别
     };
   },
   async mounted() {
@@ -151,7 +188,7 @@ export default {
             limit: this.itemsPerPage,
             index: (this.currentPage - 1) * this.itemsPerPage,
             keyword: this.searchKeyword,
-            categorys: this.selectedCategories,
+            categories: this.selectedCategories,
             is_prescription: this.isPrescription,
             is_healthcare: this.isHealthcare,
           },
@@ -241,143 +278,258 @@ export default {
     hideDropdown() {
       this.showDropdown = false; // 隐藏下拉框
     },
-    toggleAllCategories() {
-      if (this.selectedCategories.includes('全部')) {
-        this.selectedCategories = ['全部'];
+    toggleAllCategories(val) {
+      if (val) {
+        this.selectedCategories = [...this.allCategories];
       } else {
         this.selectedCategories = [];
       }
       this.fetchMedicines();
     },
-    togglePrescription() {
-      if (this.isPrescription === '全部') {
+    handlePrescriptionChange() {
+      if (this.isPrescriptionArray.includes('是') && this.isPrescriptionArray.includes('否')) {
+        this.isPrescription = null;
+      } else if (this.isPrescriptionArray.includes('是')) {
+        this.isPrescription = true;
+      } else if (this.isPrescriptionArray.includes('否')) {
+        this.isPrescription = false;
+      } else {
         this.isPrescription = null;
       }
       this.fetchMedicines();
     },
-    toggleHealthcare() {
-      if (this.isHealthcare === '全部') {
+    handleHealthcareChange() {
+      if (this.isHealthcareArray.includes('是') && this.isHealthcareArray.includes('否')) {
+        this.isHealthcare = null;
+      } else if (this.isHealthcareArray.includes('是')) {
+        this.isHealthcare = true;
+      } else if (this.isHealthcareArray.includes('否')) {
+        this.isHealthcare = false;
+      } else {
         this.isHealthcare = null;
       }
       this.fetchMedicines();
     },
   },
+  watch: {
+    selectedCategories(newVal) {
+      this.selectAllCategories = newVal.length === this.allCategories.length;
+    }
+  }
 };
 </script>
 
 <style scoped>
-.rank {
-  font-weight: bold;
-  margin-right: 10px;
-  color: #333;
-}
-.medicine-list-container {
-  display: flex;
-  flex-direction: column; /* 垂直排列 */
+/* 主内容区域使用相对布局 */
+.main-content {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
 }
 
+/* 搜索容器居中显示在最上方 */
 .search-container {
-  width: 100%; /* 关键 */
-  display: flex;
-  justify-content: center; /* 水平居中 */
-  margin-bottom: 16px;
+  width: 80%;
+  margin: 0 auto 30px auto;
+  text-align: center;
 }
 
-/* 针对 Element UI 的调整 */
-.search-container .el-input {
-  display: inline-flex; /* 或 inline-block */
-  width: 300px; /* 固定宽度（可选） */
+.search-input-group {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
 }
 
 .search-input {
-  width: 300px; /* 设置搜索框宽度 */
-  margin-right: 10px; /* 搜索框与按钮之间的间距 */
+  width: 600px;
+  margin-right: 10px;
 }
 
+/* 筛选器容器 */
 .filter-container {
   display: flex;
-  margin-top: 16px;
-  gap: 16px; /* 筛选器之间的间距 */
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  gap: 10px;
 }
 
-.filter-select {
-  width: 120px; /* 设置筛选器宽度 */
+.filter-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 5px;
 }
 
-.main-content {
-  display: flex; /* 使用 Flexbox 布局 */
-  margin-top: 20px; /* 主内容与搜索框之间的间距 */
+.filter-group span {
+  display: inline-block;
+  width: 70px;
+  margin-right: 8px;
+  white-space: nowrap;
+  text-align: left;
 }
 
+/* 药品列表容器 */
 .medicine-container {
-  width: 70%; /* 药品列表占70%宽度 */
-  display: block;
-  padding-right: 20px; /* 右侧间距 */
-}
-
-.recommendations {
   display: flex;
-  width: 30%; /* 推荐区域占30%宽度 */
-  justify-content: center; /* 水平居中 */
-}
-.recommendations .new-products{
-  width: 50%;
-  float: left;
-}
-.hot-products{
-  width: 50%;
-}
-.new-products, .hot-products {
-  margin-bottom: 20px; /* 推荐区域之间的间距 */
+  width: 100%;
 }
 
-.recommendation-image {
-  width: 100%; /* 推荐药品图片宽度 */
-  height: auto; /* 自适应高度 */
-}
-
-h3 {
-  margin-bottom: 10px; /* 标题与内容之间的间距 */
-}
-
-.pagination {
-  display: flex;
-  justify-content: center; /* 居中对齐 */
-  margin-top: 20px;
-}
-
-.pagination .select{
-  width: 60px;
-}
-.pagination .page{
-  width: 20%;
-}
-.pagination-component {
-  margin-left: 16px; /* 分页组件与选择框之间的间距 */
-}
-
+/* 药品列表占据左侧 */
 .medicine-list {
+  width: 70%;
   display: flex;
-  flex-wrap: wrap; /* 允许换行 */
-  gap: 16px; /* 药品项之间的间距 */
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-right: 20px;
 }
 
-.medicine-item {
-  width: 150px; /* 设置每个药品项的宽度 */
-  border: 1px solid #ccc; /* 边框样式 */
-  border-radius: 8px; /* 圆角 */
-  padding: 8px; /* 内边距 */
+/* 推荐区域占据右侧，并使用flex布局横向排列 */
+.recommendations {
+  width: 30%;
   display: flex;
-  flex-direction: column; /* 垂直排列内容 */
-  align-items: flex-start; /* 左对齐 */
-  text-align: left; /* 文本左对齐 */
-  cursor: pointer; /* 鼠标悬停时显示为手型 */
+  flex-direction: row; /* 改为横向排列 */
+  justify-content: space-between; /* 两边对齐 */
+  flex-wrap: wrap; /* 允许在小屏幕上换行 */
+}
+
+.new-products, .hot-products {
+  width: 48%; /* 各占48%宽度，留出间距 */
+  margin-bottom: 20px;
+}
+
+/* 确保推荐区域的药品项适应宽度 */
+.recommendations .medicine-item {
+  width: 100%; /* 在推荐区域中占满宽度 */
+  margin-bottom: 10px;
+}
+
+/* 排名样式 */
+.rank {
+  font-weight: bold;
+  margin-right: 5px;
+  color: #333;
+}
+
+/* 其他样式保持不变 */
+.medicine-item {
+  width: 180px;
+  height: 240px;
+  min-height: 240px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  cursor: pointer;
 }
 
 .medicine-image {
-  width: 100%; /* 图片宽度占满药品项 */
-  height: 100px; /* 固定高度 */
-  object-fit: cover; /* 保持图片比例并裁剪 */
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.recommendation-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+/* 确保复选框组在一行显示 */
+.el-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.el-checkbox {
+  margin-right: 8px;
+}
+
+/* 分页控件样式 */
+.pagination {
+  clear: both;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination .select {
+  width: 60px;
+}
+
+.pagination-component {
+  margin-left: 16px;
+}
+
+/* 修改 medicine-name 样式，确保超出文本正确隐藏 */
+.medicine-name {
+  display: block; /* 确保元素是块级元素 */
+  overflow: hidden; /* 超出部分隐藏 */
+  white-space: nowrap; /* 不换行 */
+  text-overflow: ellipsis; /* 省略号 */
+  width: 100%; /* 确保宽度占满父容器 */
+  max-width: 100%; /* 限制最大宽度 */
+  margin-top: 8px;
+  margin-bottom: 4px;
+  position: relative; /* 为悬浮提示定位 */
+  font-size: 16px; /* 设置合适的字体大小 */
+  box-sizing: border-box; /* 确保padding不会影响宽度计算 */
+  padding-right: 5px; /* 右侧留出一些空间 */
+}
+
+/* 确保medicine-info容器有明确的宽度限制 */
+.medicine-info {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* 各行之间的间距 */
+}
+
+/* 修改悬浮提示样式，确保它能正确显示 */
+.medicine-name:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 8px;
+  border-radius: 4px;
+  z-index: 100; /* 确保在最上层 */
+  white-space: normal;
+  max-width: 200px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* 药品描述样式 */
+.medicine-description {
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 15px;
+  color: #666;
+  line-height: 1.2;
+}
+
+/* 空描述样式 */
+.empty-description {
+  height: 17px; /* 与正常描述行高度一致 */
+  visibility: visible; /* 确保空行可见 */
+}
+
+/* 价格和库存样式 */
+.medicine-price, .medicine-stock {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.0;
 }
 .medicine-image-container {
   width: 100%;
@@ -391,58 +543,4 @@ h3 {
   max-height: 100%;  /* 限制最大高度为容器高度 */
   object-fit: contain; /* 保持图片比例，完全显示 */
 }
-.medicine-detail--image {
-  width: 100%; /* 图片宽度占满药品项 */
-  height: 100%; /* 固定高度 */
-  object-fit: cover; /* 保持图片比例并裁剪 */
-}
-
-.medicine-info {
-  display: flex;
-  flex-direction: column; /* 垂直排列名称、描述和价格 */
-  width: 100%; /* 使其占满整个宽度 */
-}
-
-.medicine-name {
-  overflow: hidden; /* 超出部分隐藏 */
-  white-space: nowrap; /* 不换行 */
-  text-overflow: ellipsis; /* 省略号 */
-  max-width: 80%; /* 限制名称的最大宽度 */
-}
-
-.medicine-description {
-  overflow: hidden; /* 超出部分隐藏 */
-  white-space: nowrap; /* 不换行 */
-  text-overflow: ellipsis; /* 省略号 */
-  max-width: 100%; /* 限制描述的最大宽度 */
-}
-
-.medicine-price {
-  margin-top: 4px; /* 描述和价格之间的间距 */
-}
-
-.medicine-stock {
-  margin-top: 4px; /* 描述和库存之间的间距 */
-}
-.search-container {
-  display: flex;
-  align-items: center; /* 水平居中对齐 */
-  margin-bottom: 16px; /* 搜索框和药品列表之间的间距 */
-}
-
-.search-input {
-  width: 300px; /* 设置搜索框宽度 */
-  margin-right: 10px; /* 搜索框与按钮之间的间距 */
-}
-
-.filter-container {
-  display: flex;
-  margin-top: 16px;
-  gap: 16px; /* 筛选器之间的间距 */
-}
-
-.filter-select {
-  width: 120px; /* 设置筛选器宽度 */
-}
-
 </style>

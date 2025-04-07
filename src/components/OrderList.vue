@@ -28,7 +28,7 @@
     <div class="order-actions">
       <el-button type="danger" @click="deleteSelectedOrders">删除</el-button>
       <el-button type="warning" @click="cancelSelectedOrders">取消</el-button>
-      <el-button type="primary" @click="checkoutSelectedOrders">结算</el-button>
+      <el-button type="primary" @click="checkoutSelectedOrders">支付</el-button>
     </div>
   </div>
 </template>
@@ -118,16 +118,20 @@ export default {
     async deleteSelectedOrders() {
       const selectedOrders = this.orders.filter(order => order.selected);
       const orderIds = selectedOrders.map(order => order.id);
-
+  
       try {
         const response = await http.delete('/orders/batch_delete', { data: { order_ids: orderIds } });
         if (response.data.code === 0) {
           ElMessage.success('选中订单已成功删除');
         } else {
-          ElMessage.error(`删除失败: ${response.data.message}`);
+          if (orderIds.length !== 0){
+            ElMessage.error(`删除失败: ${response.data.message}`);
+          }
         }
       } catch (error) {
-        ElMessage.error(`删除失败: ${error.message}`);
+        if (orderIds.length !== 0){
+         ElMessage.error(`删除失败: ${error.message}`);
+        }
       } finally {
         this.fetchOrders(); // 无论成功与否，刷新订单列表
       }
@@ -148,7 +152,7 @@ export default {
       }
 
       if (failedOrders.length === 0) {
-        ElMessage.success('所有选中订单已成功取消');
+        console.log('所有选中订单已成功取消');
       } else {
         failedOrders.forEach(failedOrder => {
           ElMessage.error(`订单 ${failedOrder.id} 取消失败: ${failedOrder.message}`);
@@ -172,7 +176,7 @@ export default {
       }
 
       if (failedOrders.length === 0) {
-        ElMessage.success('所有选中订单已成功结算');
+        console.log('所有选中订单已成功结算');
       } else {
         failedOrders.forEach(failedOrder => {
           ElMessage.error(`订单 ${failedOrder.id} 结算失败: ${failedOrder.message}`);
