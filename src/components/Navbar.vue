@@ -1,18 +1,30 @@
 <template>
-  <el-header>
-    <el-menu
-      :default-active="activeMenu"
-      class="menu"
-      mode="horizontal"
-      router
-    >
-      <el-menu-item index="1" @click="navigateTo('')">首页</el-menu-item>
-      <el-menu-item index="2" @click="navigateTo('cart')">购物车</el-menu-item>
-      <el-menu-item index="3" @click="navigateTo('orders')">订单</el-menu-item>
-      <el-menu-item index="4" v-if="isAdmin" @click="navigateTo('manage-products')">药品管理</el-menu-item>
-      <el-menu-item index="5" v-if="isAdmin" @click="navigateTo('user-management')">用户管理</el-menu-item>
-      <el-menu-item index="6" @click="navigateTo('profile')">个人中心</el-menu-item>
-    </el-menu>
+  <el-header class="navbar-header">
+    <div class="navbar-container">
+      <div class="logo-container">
+        <svg class="logo-icon" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h16v12z"/>
+          <path fill="currentColor" d="M13 10h-2v3H8v2h3v3h2v-3h3v-2h-3z"/>
+        </svg>
+        <span class="logo-text">在线购药商城</span>
+      </div>
+      <el-menu
+        :default-active="activeMenu"
+        class="menu"
+        mode="horizontal"
+        router
+        background-color="#ffffff"
+        text-color="#303133"
+        active-text-color="#409EFF"
+      >
+        <el-menu-item index="1" @click="navigateTo('')">首页</el-menu-item>
+        <el-menu-item index="2" @click="navigateTo('cart')">购物车</el-menu-item>
+        <el-menu-item index="3" @click="navigateTo('orders')">订单</el-menu-item>
+        <el-menu-item index="4" v-if="isAdmin" @click="navigateTo('manage-products')">药品管理</el-menu-item>
+        <el-menu-item index="5" v-if="isAdmin" @click="navigateTo('user-management')">用户管理</el-menu-item>
+        <el-menu-item index="6" @click="navigateTo('profile')">个人中心</el-menu-item>
+      </el-menu>
+    </div>
   </el-header>
   
 </template>
@@ -98,35 +110,67 @@ export default {
 </script>
 
 <style scoped>
+.navbar-header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  margin-right: 48px;
+  cursor: pointer;
+}
+
+.logo-icon {
+  color: #409EFF;
+  margin-right: 8px;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #303133;
+  white-space: nowrap;
+}
+
 .menu {
-  display: flex; /* 使用 flex 布局 */
-  justify-content: flex-start; /* 左对齐 */
-  flex-wrap: nowrap; /* 不换行 */
-  overflow: auto; /* 允许溢出时滚动 */
-  margin-left: 20px; /* 调整左边距 */
-  margin-right: 25vw;
-}
-el-header {
+  flex: 1;
   display: flex;
-  justify-content: space-between; /* 让菜单和搜索框分散排列 */
-  align-items: center;
-  padding: 0 20px; /* 添加内边距 */
-  height: 100px;
+  justify-content: flex-start;
+  border: none;
+  height: 64px;
+  line-height: 64px;
 }
 
-.search-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-grow: 1;
-  max-width: 40vw;
-}
-.search-button{
-  width: 90px;
-  height: 50px;
-}
-.search-input{
-  height: 50px;
+.el-menu-item {
+  font-size: 15px;
+  padding: 0 20px;
+  height: 64px;
+  line-height: 64px;
+  transition: all 0.3s ease;
 }
 
-</style> 
+.el-menu-item:hover {
+  background-color: #f5f7fa;
+}
+
+.el-menu--horizontal > .el-menu-item.is-active {
+  border-bottom: 2px solid #409EFF;
+  font-weight: 500;
+}
+
+</style>

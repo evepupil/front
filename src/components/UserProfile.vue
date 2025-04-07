@@ -1,30 +1,46 @@
 <template>
   <div class="user-profile">
-    <h2>个人中心</h2>
-    <el-card>
+    <div class="profile-header">
+      <h2><el-icon><User /></el-icon> 个人中心</h2>
+    </div>
+    <el-card class="profile-card">
       <div class="user-info">
-        <el-form :model="user" label-width="100px">
+        <el-form :model="user" label-width="120px">
           <el-form-item label="用户名">
-            <el-input v-model="user.username" disabled></el-input>
+            <el-input v-model="user.username" disabled>
+              <template #prefix><el-icon><User /></el-icon></template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="邮箱">
-            <el-input v-model="user.email"></el-input>
+          <el-form-item label="邮箱" :error="emailError">
+            <el-input v-model="user.email">
+              <template #prefix><el-icon><Message /></el-icon></template>
+            </el-input>
           </el-form-item>
-          <el-form-item label="电话">
-            <el-input v-model="user.phone"></el-input>
+          <el-form-item label="电话" :error="phoneError">
+            <el-input v-model="user.phone">
+              <template #prefix><el-icon><Phone /></el-icon></template>
+            </el-input>
           </el-form-item>
           <el-form-item label="地址">
-            <el-input v-model="user.address"></el-input>
+            <el-input v-model="user.address">
+              <template #prefix><el-icon><Location /></el-icon></template>
+            </el-input>
           </el-form-item>
           <el-form-item label="用户类型">
-            <el-input :value="user.isAdmin ? '管理员' : '普通用户'" disabled></el-input>
+            <el-input :value="user.isAdmin ? '管理员' : '普通用户'" disabled>
+              <template #prefix><el-icon><UserFilled /></el-icon></template>
+            </el-input>
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="updateProfile">保存修改</el-button>
-            <el-button type="danger" @click="openResetPasswordDialog">重置密码</el-button>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="warning" @click="logout">注销</el-button>
+          <el-form-item class="action-buttons">
+            <el-button type="primary" @click="updateProfile">
+              <el-icon><Check /></el-icon>保存修改
+            </el-button>
+            <el-button type="danger" @click="openResetPasswordDialog">
+              <el-icon><Key /></el-icon>重置密码
+            </el-button>
+            <el-button type="warning" @click="logout">
+              <el-icon><SwitchButton /></el-icon>注销
+            </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -52,7 +68,8 @@
 
 <script>
 import http from '@/http'; // 引入配置好的 Axios 实例
-import { ElCard, ElForm, ElFormItem, ElInput, ElButton, ElMessage, ElDialog } from 'element-plus'; // 引入 Element Plus 组件
+import { ElCard, ElForm, ElFormItem, ElInput, ElButton, ElMessage, ElDialog } from 'element-plus';
+import { User, Message, Phone, Location, UserFilled, Check, Key, SwitchButton } from '@element-plus/icons-vue';
 
 export default {
   name: 'UserProfile',
@@ -63,6 +80,14 @@ export default {
     ElInput,
     ElButton,
     ElDialog,
+    User,
+    Message,
+    Phone,
+    Location,
+    UserFilled,
+    Check,
+    Key,
+    SwitchButton
   },
   data() {
     return {
@@ -80,6 +105,8 @@ export default {
         newPassword: '',
         confirmPassword: '',
       },
+      emailError: '', // 添加邮箱错误信息
+      phoneError: '', // 添加电话错误信息
     };
   },
   async created() {
@@ -88,7 +115,7 @@ export default {
   methods: {
     async fetchUserProfile() {
       try {
-        const response = await http.get('/user/profile');
+        const response = await http.get('/profile');
         if (response.data.code === 0) {
           this.user = {
             username: response.data.user.username,
@@ -106,6 +133,22 @@ export default {
       }
     },
     async updateProfile() {
+      // 验证邮箱格式
+      const emailRegex = /^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/;
+      if (!emailRegex.test(this.user.email)) {
+        this.emailError = '请输入正确的邮箱格式';
+        return;
+      }
+      this.emailError = '';
+      
+      // 验证电话格式
+      const phoneRegex = /^1[3-9]\d{9}$/;
+      if (!phoneRegex.test(this.user.phone)) {
+        this.phoneError = '请输入正确的手机号码格式';
+        return;
+      }
+      this.phoneError = '';
+      
       try {
         const response = await http.put('/user/profile', {
           email: this.user.email,
@@ -159,13 +202,53 @@ export default {
 
 <style scoped>
 .user-profile {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.profile-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.profile-header h2 {
+  font-size: 28px;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.profile-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .user-info {
   font-size: 16px;
   line-height: 1.5;
+  padding: 20px;
 }
-</style> 
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+:deep(.el-input__wrapper) {
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+:deep(.el-button) {
+  padding: 12px 20px;
+  font-weight: 500;
+}
+</style>

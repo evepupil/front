@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1 class="page-title">爱康网上购药系统</h1>
     <Navbar />
     <router-view></router-view>
   </div>
@@ -14,6 +13,9 @@ export default {
   components: {
     Navbar,
   },
+  mounted() {
+    document.title = '在线购药商城' 
+  }
 };
 </script>
 

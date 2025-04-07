@@ -324,26 +324,36 @@ export default {
 .main-content {
   position: relative;
   width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 20px;
 }
 
 /* 搜索容器居中显示在最上方 */
 .search-container {
-  width: 80%;
+  width: 90%;
+  max-width: 1200px;
   margin: 0 auto 30px auto;
-  text-align: center;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .search-input-group {
   display: flex;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .search-input {
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   margin-right: 10px;
+}
+
+.search-button {
+  min-width: 100px;
 }
 
 /* 筛选器容器 */
@@ -352,195 +362,443 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  gap: 10px;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
   width: 100%;
-  margin-bottom: 5px;
+  margin-bottom: 0;
 }
 
 .filter-group span {
   display: inline-block;
   width: 70px;
-  margin-right: 8px;
+  margin-right: 12px;
   white-space: nowrap;
   text-align: left;
+  color: #606266;
+  font-weight: 500;
 }
 
 /* 药品列表容器 */
 .medicine-container {
   display: flex;
   width: 100%;
+  gap: 40px;
+  padding-right: 20px;
 }
 
 /* 药品列表占据左侧 */
 .medicine-list {
-  width: 70%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding-right: 20px;
+  width: calc(100% - 280px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding-right: 0;
 }
 
-/* 推荐区域占据右侧，并使用flex布局横向排列 */
 .recommendations {
-  width: 30%;
-  display: flex;
-  flex-direction: row; /* 改为横向排列 */
-  justify-content: space-between; /* 两边对齐 */
-  flex-wrap: wrap; /* 允许在小屏幕上换行 */
+  width: 280px;
+  flex-shrink: 0;
 }
 
-.new-products, .hot-products {
-  width: 48%; /* 各占48%宽度，留出间距 */
-  margin-bottom: 20px;
+@media (max-width: 1200px) {
+  .medicine-list {
+    width: calc(100% - 280px);
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .recommendations {
+    width: 280px;
+  }
+}
+.medicine-item {
+  width: 100%;
+  min-width: 240px;
+  height: 340px;
+  min-height: 240px;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-/* 确保推荐区域的药品项适应宽度 */
-.recommendations .medicine-item {
-  width: 100%; /* 在推荐区域中占满宽度 */
+.medicine-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.medicine-image, .recommendation-image {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 6px;
   margin-bottom: 10px;
 }
 
-/* 排名样式 */
-.rank {
-  font-weight: bold;
-  margin-right: 5px;
-  color: #333;
-}
-
-/* 其他样式保持不变 */
-.medicine-item {
-  width: 180px;
-  height: 240px;
-  min-height: 240px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  cursor: pointer;
-}
-
-.medicine-image {
-  width: 100%;
-  height: 100px;
-  object-fit: cover;
-}
-
-.recommendation-image {
-  width: 100%;
-  height: 100px;
-  object-fit: cover;
-}
-
-/* 确保复选框组在一行显示 */
-.el-checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.el-checkbox {
-  margin-right: 8px;
-}
-
-/* 分页控件样式 */
-.pagination {
-  clear: both;
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.pagination .select {
-  width: 60px;
-}
-
-.pagination-component {
-  margin-left: 16px;
-}
-
-/* 修改 medicine-name 样式，确保超出文本正确隐藏 */
-.medicine-name {
-  display: block; /* 确保元素是块级元素 */
-  overflow: hidden; /* 超出部分隐藏 */
-  white-space: nowrap; /* 不换行 */
-  text-overflow: ellipsis; /* 省略号 */
-  width: 100%; /* 确保宽度占满父容器 */
-  max-width: 100%; /* 限制最大宽度 */
-  margin-top: 8px;
-  margin-bottom: 4px;
-  position: relative; /* 为悬浮提示定位 */
-  font-size: 16px; /* 设置合适的字体大小 */
-  box-sizing: border-box; /* 确保padding不会影响宽度计算 */
-  padding-right: 5px; /* 右侧留出一些空间 */
-}
-
-/* 确保medicine-info容器有明确的宽度限制 */
 .medicine-info {
   width: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 4px; /* 各行之间的间距 */
+  gap: 8px;
+  text-align: left;
+  padding: 0 8px;
 }
 
-/* 修改悬浮提示样式，确保它能正确显示 */
-.medicine-name:hover::after {
-  content: attr(title);
-  position: absolute;
-  left: 0;
-  top: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 5px 8px;
-  border-radius: 4px;
-  z-index: 100; /* 确保在最上层 */
-  white-space: normal;
-  max-width: 200px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  font-size: 12px;
+.medicine-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0;
   line-height: 1.4;
 }
 
-/* 药品描述样式 */
 .medicine-description {
+  font-size: 14px;
+  color: #606266;
   margin: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: 15px;
-  color: #666;
-  line-height: 1.2;
+  line-height: 1.4;
 }
 
-/* 空描述样式 */
-.empty-description {
-  height: 17px; /* 与正常描述行高度一致 */
-  visibility: visible; /* 确保空行可见 */
+.medicine-price {
+  font-size: 16px;
+  color: #f56c6c;
+  font-weight: 600;
+  margin: 4px 0;
 }
 
-/* 价格和库存样式 */
-.medicine-price, .medicine-stock {
+.medicine-stock, .medicine-sales {
+  font-size: 14px;
+  color: #909399;
   margin: 0;
-  font-size: 15px;
-  line-height: 1.0;
 }
+
+/* 分页控件样式 */
+.pagination {
+  margin-top: 30px;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+/* 对话框样式 */
 .medicine-image-container {
   width: 100%;
   height: 300px;
+  
   display: flex;
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中 */
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden;
 }
-.medicine-image-container img{
-  max-width: 100%;   /* 限制最大宽度为容器宽度 */
-  max-height: 100%;  /* 限制最大高度为容器高度 */
-  object-fit: contain; /* 保持图片比例，完全显示 */
+
+.medicine-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
+
+@media (max-width: 1200px) {
+  .medicine-list {
+    width: 65%;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .recommendations {
+    width: 35%;
+  }
+}
+
+@media (max-width: 768px) {
+  .medicine-container {
+    flex-direction: column;
+  }
+  .medicine-list, .recommendations ul {
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .medicine-list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+  .medicine-item {
+    width: calc(50% - 10px);
+  }
+  .search-container {
+    width: 100%;
+    padding: 15px;
+  }
+  .search-input {
+    width: 100%;
+  }
+  .medicine-list, .recommendations ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+</style>
+.recommendations {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.new-products,
+.hot-products {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.new-products h3,
+.hot-products h3 {
+  font-size: 18px;
+  color: #303133;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f2f5;
+}
+
+.recommendations .medicine-item {
+  display: flex;
+  align-items: flex-start;
+  height: auto;
+  min-height: 100px;
+  margin-bottom: 15px;
+  padding: 10px;
+}
+
+.recommendations .medicine-item:last-child {
+  margin-bottom: 0;
+}
+
+.recommendations .recommendation-image {
+  width: 80px;
+  height: 80px;
+  margin-right: 12px;
+  margin-bottom: 0;
+}
+
+.recommendations .medicine-info {
+  flex: 1;
+  padding: 0;
+}
+
+.recommendations .medicine-name {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.recommendations .medicine-description,
+.recommendations .medicine-price,
+.recommendations .medicine-stock,
+.recommendations .medicine-sales {
+  font-size: 12px;
+  margin: 2px 0;
+}
+
+.recommendations .rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  padding: 0 6px;
+  background: #f44336;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1200px) {
+  .medicine-container {
+    flex-direction: column;
+  }
+  .medicine-list {
+    width: 100%;
+  }
+  .recommendations {
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .recommendations {
+    flex-direction: column;
+  }
+  .new-products,
+  .hot-products {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .medicine-list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+  .medicine-item {
+    width: calc(50% - 10px);
+  }
+  .search-container {
+    width: 100%;
+    padding: 15px;
+  }
+  .search-input {
+    width: 100%;
+  }
+  .medicine-list, .recommendations ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+<style scoped>
+.recommendations {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.new-products,
+.hot-products {
+  width: 300px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.new-products h3,
+.hot-products h3 {
+  font-size: 18px;
+  color: #303133;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f2f5;
+}
+
+.recommendations .medicine-item {
+  display: flex;
+  align-items: flex-start;
+  height: auto;
+  min-height: 100px;
+  margin-bottom: 15px;
+  padding: 10px;
+}
+
+.recommendations .medicine-item:last-child {
+  margin-bottom: 0;
+}
+
+.recommendations .recommendation-image {
+  width: 80px;
+  height: 80px;
+  margin-right: 12px;
+  margin-bottom: 0;
+}
+
+.recommendations .medicine-info {
+  flex: 1;
+  padding: 0;
+}
+
+.recommendations .medicine-name {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.recommendations .medicine-description,
+.recommendations .medicine-price,
+.recommendations .medicine-stock,
+.recommendations .medicine-sales {
+  font-size: 12px;
+  margin: 2px 0;
+}
+
+.recommendations .rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  padding: 0 6px;
+  background: #f44336;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1200px) {
+  .medicine-container {
+    flex-direction: column;
+  }
+  .medicine-list {
+    width: 100%;
+  }
+  .recommendations {
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .recommendations {
+    flex-direction: column;
+  }
+  .new-products,
+  .hot-products {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .medicine-list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+  .medicine-item {
+    width: calc(50% - 10px);
+  }
+  .search-container {
+    width: 100%;
+    padding: 15px;
+  }
+  .search-input {
+    width: 100%;
+  }
+  .medicine-list, 
+  .recommendations ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
 </style>

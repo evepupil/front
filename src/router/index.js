@@ -13,6 +13,9 @@ const routes = [
   {
     path: '/',
     component: Home,
+    meta: {
+      title: '在线购药商场'  
+    },
     children: [
       {
         path: '',

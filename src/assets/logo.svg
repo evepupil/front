@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 药店十字标志背景 -->
+  <circle cx="100" cy="100" r="90" fill="#3498db" />
+  
+  <!-- 白色十字 -->
+  <rect x="45" y="85" width="110" height="30" fill="white" rx="8" />
+  <rect x="85" y="45" width="30" height="110" fill="white" rx="8" />
+  
+  <!-- 装饰圆环 -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="white" stroke-width="4" stroke-opacity="0.3" />
+</svg>
